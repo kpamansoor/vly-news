@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.google.firebase.quickstart.fcm.NewsDetailsActivity">
+
+    <ImageView
+        android:id="@+id/detail_photo"
+        android:layout_width="match_parent"
+        android:layout_height="150dp"
+        android:src="@drawable/vlylogo"/>
+    <TextView
+        android:id="@+id/detail_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="#000"
+        android:textStyle="bold"
+        android:textSize="20dp"
+        android:padding="5dp"
+        android:layout_below="@id/detail_photo"/>
+    <TextView
+        android:id="@+id/detail_date"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="5dp"
+        android:layout_below="@id/detail_title"/>
+    <TextView
+        android:id="@+id/detail_desc"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="5dp"
+        android:textSize="20dp"
+        android:scrollbars = "vertical"
+        android:layout_below="@id/detail_date"/>
+</RelativeLayout>
