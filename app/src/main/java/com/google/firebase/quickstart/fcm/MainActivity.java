@@ -1,9 +1,13 @@
 package com.google.firebase.quickstart.fcm;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -11,8 +15,18 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.util.Xml;
 import android.view.View;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
+
+import com.bumptech.glide.request.RequestOptions;
+import com.glide.slider.library.Animations.DescriptionAnimation;
+import com.glide.slider.library.SliderLayout;
+import com.glide.slider.library.SliderTypes.BaseSliderView;
+import com.glide.slider.library.SliderTypes.TextSliderView;
+import com.glide.slider.library.Tricks.ViewPagerEx;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.messaging.FirebaseMessaging;
 import org.xmlpull.v1.XmlPullParser;
@@ -23,19 +37,29 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+
+public class MainActivity extends AppCompatActivity implements BaseSliderView.OnSliderClickListener,
+        ViewPagerEx.OnPageChangeListener{
 
     private static final String TAG = "MainActivity";
+    private static String top5_news = "";
     private RecyclerView rv;
     private List<RssFeedModel> mFeedModelList;
+    private List<RssFeedModel2> list2;
     private SwipeRefreshLayout mSwipeLayout;
     private RssFeedListAdapter recyclerAdapter;
+    private TextView tv_top,tv_news_line;
+    private SliderLayout mDemoSlider;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         rv = (RecyclerView)findViewById(R.id.rv);
+        tv_top = (TextView) findViewById(R.id.tv_top);
+        tv_news_line = (TextView) findViewById(R.id.tv_news_line);
+        mDemoSlider = findViewById(R.id.slider);
+
         mSwipeLayout = (SwipeRefreshLayout) findViewById(R.id.swipeRefreshLayout);
         LinearLayoutManager llm = new LinearLayoutManager(this);
         rv.setLayoutManager(llm);
@@ -47,14 +71,9 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         new FetchFeedTask().execute();
+        new FetchFeedDetails().execute();
 
-//        recyclerAdapter.setClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                int pos = rv.indexOfChild(v);
-//                Toast.makeText(MainActivity.this, " pos"+pos, Toast.LENGTH_SHORT).show();
-//            }
-//        });
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             // Create channel to show notifications.
             String channelId  = getString(R.string.default_notification_channel_id);
@@ -103,8 +122,38 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    @Override
+    public void onSliderClick(BaseSliderView baseSliderView) {
+        int i = Integer.parseInt(baseSliderView.getBundle().get("extra").toString());
+        Intent details_page = new Intent(MainActivity.this,NewsDetailsActivity.class);
+        details_page.putExtra("title", mFeedModelList.get(i).title);
+        details_page.putExtra("desc", mFeedModelList.get(i).description);
+        details_page.putExtra("date", mFeedModelList.get(i).pubDate);
+        details_page.putExtra("link", mFeedModelList.get(i).link);
+        details_page.putExtra("link_image", list2.get(i).getLink());
+        startActivity(details_page);
+    }
 
+    @Override
+    public void onPageScrolled(int i, float v, int i1) {
 
+    }
+
+    @Override
+    public void onPageSelected(int i) {
+
+    }
+
+    @Override
+    public void onPageScrollStateChanged(int i) {
+
+    }
+
+    @Override
+    protected void onStop() {
+        mDemoSlider.stopAutoCycle();
+        super.onStop();
+    }
 
     private class FetchFeedTask extends AsyncTask<Void, Void, Boolean> {
 
@@ -144,9 +193,18 @@ public class MainActivity extends AppCompatActivity {
             if (success) {
                 recyclerAdapter = new RssFeedListAdapter(mFeedModelList,rv);
                 rv.setAdapter(recyclerAdapter);
+                for (int i = 0; i < 5; i ++){
+                    top5_news += mFeedModelList.get(i).title;
+                    if(i != 4)
+                        top5_news +="  | ";
+                }
+                tv_news_line.setText(top5_news);
+                tv_top.setVisibility(View.VISIBLE);
+                tv_top.startAnimation(AnimationUtils.loadAnimation(MainActivity.this, android.R.anim.slide_in_left));
+
             } else {
                 Toast.makeText(MainActivity.this,
-                        "Enter a valid Rss feed url",
+                        "Couln't load latest news",
                         Toast.LENGTH_LONG).show();
             }
         }
@@ -201,7 +259,8 @@ public class MainActivity extends AppCompatActivity {
                 } else if (name.equalsIgnoreCase("link")) {
                     link = result;
                 } else if (name.equalsIgnoreCase("description")) {
-                    description = result;
+                    if(!result.equalsIgnoreCase("News around Valanchery, Photos, Blogs, Yellow Pages, Events, Shopping, Reviews and more"))
+                        description = result;
                 } else if (name.equalsIgnoreCase("pubDate")) {
                     pubDate = result;
                 }
@@ -218,6 +277,176 @@ public class MainActivity extends AppCompatActivity {
                     link = null;
                     description = null;
                     pubDate = null;
+                    isItem = false;
+                }
+            }
+            return items;
+        } finally {
+            inputStream.close();
+        }
+    }
+
+    private class FetchFeedDetails extends AsyncTask<Void, Void, Boolean> {
+
+        private String urlLink;
+
+        @Override
+        protected void onPreExecute() {
+            urlLink = "https://www.valanchery.in/feed/instant-articles";
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... voids) {
+//            if (TextUtils.isEmpty(urlLink))
+//                return false;
+
+            try {
+                if(!urlLink.startsWith("http://") && !urlLink.startsWith("https://"))
+                    urlLink = "http://" + urlLink;
+
+                URL url = new URL(urlLink);
+                InputStream inputStream = url.openConnection().getInputStream();
+                list2 = parseFeed2(inputStream);
+                String link_string = "";
+                for(int i = 0 ; i < list2.size(); i++){
+                    link_string += list2.get(i).getLink()+",";
+                }
+                SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
+                SharedPreferences.Editor editor = preferences.edit();
+                editor.putString("links", link_string);
+                editor.commit();
+
+                return true;
+            } catch (IOException e) {
+                Log.e(TAG, "Error", e);
+            } catch (XmlPullParserException e) {
+                Log.e(TAG, "Error", e);
+            }
+            return false;
+        }
+
+
+
+        @Override
+        protected void onPostExecute(Boolean success) {
+            initiateImageFlipper();
+        }
+    }
+
+    private void initiateImageFlipper() {
+
+
+        RequestOptions requestOptions = new RequestOptions();
+        requestOptions
+                .centerCrop();
+        //.diskCacheStrategy(DiskCacheStrategy.NONE)
+        //.placeholder(R.drawable.placeholder)
+        //.error(R.drawable.placeholder);
+
+        for (int i = 0; i < 5; i++) {
+            TextSliderView sliderView = new TextSliderView(this);
+            // if you want show image only / without description text use DefaultSliderView instead
+
+            // initialize SliderLayout
+            sliderView
+                    .image(list2.get(i).getLink())
+                    .description(mFeedModelList.get(i).title)
+                    .setRequestOption(requestOptions)
+                    .setBackgroundColor(Color.WHITE)
+                    .setProgressBarVisible(true)
+                    .setOnSliderClickListener(this);
+
+            //add your extra information
+            sliderView.bundle(new Bundle());
+            sliderView.getBundle().putString("extra", i+"");
+            mDemoSlider.addSlider(sliderView);
+        }
+
+        // set Slider Transition Animation
+        // mDemoSlider.setPresetTransformer(SliderLayout.Transformer.Default);
+        mDemoSlider.setPresetTransformer(SliderLayout.Transformer.Accordion);
+
+        mDemoSlider.setPresetIndicator(SliderLayout.PresetIndicators.Center_Bottom);
+        mDemoSlider.setCustomAnimation(new DescriptionAnimation());
+        mDemoSlider.setDuration(4000);
+        mDemoSlider.addOnPageChangeListener(this);
+
+    }
+
+
+
+
+    public List<RssFeedModel2> parseFeed2(InputStream inputStream) throws XmlPullParserException,
+            IOException {
+        String title = null;
+        String link = null;
+        String description = null;
+        String content = null;
+        boolean isItem = false;
+        List<RssFeedModel2> items = new ArrayList<>();
+
+        try {
+            XmlPullParser xmlPullParser = Xml.newPullParser();
+            xmlPullParser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false);
+            xmlPullParser.setInput(inputStream, null);
+
+            xmlPullParser.nextTag();
+            while (xmlPullParser.next() != XmlPullParser.END_DOCUMENT) {
+                int eventType = xmlPullParser.getEventType();
+
+                String name = xmlPullParser.getName();
+                if(name == null)
+                    continue;
+
+                if(eventType == XmlPullParser.END_TAG) {
+                    if(name.equalsIgnoreCase("item")) {
+                        isItem = false;
+                    }
+                    continue;
+                }
+
+                if (eventType == XmlPullParser.START_TAG) {
+                    if(name.equalsIgnoreCase("item")) {
+                        isItem = true;
+                        continue;
+                    }
+                }
+
+                Log.d("MyXmlParser", "Parsing name ==> " + name);
+                String result = "";
+                if (xmlPullParser.next() == XmlPullParser.TEXT) {
+                    result = xmlPullParser.getText();
+                    xmlPullParser.nextTag();
+                }
+
+                if (name.equalsIgnoreCase("title")) {
+                    title = result;
+                }  else if (name.equalsIgnoreCase("link")) {
+                    link = result;
+                }  else if (name.equalsIgnoreCase("description")) {
+                    if(!result.equalsIgnoreCase("News around Valanchery, Photos, Blogs, Yellow Pages, Events, Shopping, Reviews and more"))
+                        description = result;
+                } else if (name.equalsIgnoreCase("content:encoded")) {
+                    content = result;
+                }
+
+                if (title != null && link != null&& content != null && description != null ) {
+                    if(isItem) {
+                        try {
+                            link = content.split("<figure data-feedback=\"fb:likes,fb:comments\"><img src=\"")[1].split("\"/>")[0];
+                            RssFeedModel2 item = new RssFeedModel2(link);
+                            items.add(item);
+                        }catch (Exception e){}
+
+
+                    }
+                    else {
+                    }
+
+                    title = null;
+                    link = null;
+                    content = null;
+                    description = null;
                     isItem = false;
                 }
             }

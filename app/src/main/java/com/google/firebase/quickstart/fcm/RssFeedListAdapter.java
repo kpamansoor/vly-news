@@ -1,6 +1,8 @@
 package com.google.firebase.quickstart.fcm;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -42,16 +44,28 @@ public class RssFeedListAdapter extends RecyclerView.Adapter<RssFeedListAdapter.
     public FeedModelViewHolder onCreateViewHolder(ViewGroup parent, int type) {
         View v = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.item, parent, false);
-        FeedModelViewHolder holder = new FeedModelViewHolder(v);
+        final FeedModelViewHolder holder = new FeedModelViewHolder(v);
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                int pos = recyclerView.indexOfChild(view);
+
+//                int pos = recyclerView.indexOfChild(view);
+                int pos = holder.getAdapterPosition();
                 Intent details_page = new Intent(view.getContext(),NewsDetailsActivity.class);
                 details_page.putExtra("title", mRssFeedModels.get(pos).title);
                 details_page.putExtra("desc", mRssFeedModels.get(pos).description);
                 details_page.putExtra("date", mRssFeedModels.get(pos).pubDate);
                 details_page.putExtra("link", mRssFeedModels.get(pos).link);
+
+                try {
+                    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(view.getContext());
+                    String links = preferences.getString("links", "");
+                    String[] linkArray;
+                    if (links.length() > 0) {
+                        linkArray = links.split(",");
+                        details_page.putExtra("link_image", linkArray[pos]);
+                    }
+                }catch (Exception e){}
                 view.getContext().startActivity(details_page);
 
             }

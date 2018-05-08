@@ -9,29 +9,54 @@
     <ImageView
         android:id="@+id/detail_photo"
         android:layout_width="match_parent"
-        android:layout_height="150dp"
+        android:layout_height="200dp"
+        android:scaleType="centerCrop"
         android:src="@drawable/vlylogo"/>
+
     <TextView
         android:id="@+id/detail_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textColor="#000"
-        android:textStyle="bold"
-        android:textSize="20dp"
+        android:layout_below="@id/detail_photo"
         android:padding="5dp"
-        android:layout_below="@id/detail_photo"/>
+        android:textColor="#000"
+        android:textSize="18dp"
+        android:textStyle="bold"
+        />
+
     <TextView
         android:id="@+id/detail_date"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="5dp"
-        android:layout_below="@id/detail_title"/>
-    <TextView
-        android:id="@+id/detail_desc"
+        android:layout_below="@id/detail_title"
+        android:padding="5dp" />
+
+    <ScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="5dp"
-        android:textSize="20dp"
-        android:scrollbars = "vertical"
-        android:layout_below="@id/detail_date"/>
+        android:layout_below="@id/detail_date">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/detail_desc"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="5dp"
+                android:scrollbars="vertical"
+                android:textSize="20dp" />
+
+            <Button
+                android:id="@+id/btn_full_story"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/button_shape"
+                android:text="Read full story..."
+                android:layout_margin="10dp"
+                android:textColor="#fff" />
+        </LinearLayout>
+    </ScrollView>
 </RelativeLayout>
