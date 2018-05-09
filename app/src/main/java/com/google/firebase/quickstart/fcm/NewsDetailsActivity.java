@@ -18,7 +18,7 @@ public class NewsDetailsActivity extends AppCompatActivity  {
     private TextView detail_desc;
     private TextView detail_date;
     private String title,desc,link,date,link_image;
-    private Button btn_full_story;
+    private Button btn_full_story,btn_share;
     private ImageView detail_photo;
     private List<RssFeedModel2> image_links;
     @Override
@@ -30,6 +30,7 @@ public class NewsDetailsActivity extends AppCompatActivity  {
         detail_desc = (TextView)findViewById(R.id.detail_desc);
         detail_date = (TextView)findViewById(R.id.detail_date);
         btn_full_story = (Button) findViewById(R.id.btn_full_story);
+        btn_share = (Button) findViewById(R.id.btn_share);
         detail_photo = (ImageView) findViewById(R.id.detail_photo);
         detail_desc.setMovementMethod(new ScrollingMovementMethod());
 
@@ -61,7 +62,26 @@ public class NewsDetailsActivity extends AppCompatActivity  {
                 startActivity(browserIntent);
             }
         });
+        btn_share.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                shareText();
+            }
+        });
 
+    }
+
+    private void shareText() {
+        Intent share = new Intent(android.content.Intent.ACTION_SEND);
+        share.setType("text/plain");
+        share.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
+
+        // Add data to the intent, the receiving app will decide
+        // what to do with it.
+        share.putExtra(Intent.EXTRA_SUBJECT, title);
+        share.putExtra(Intent.EXTRA_TEXT, desc + "\n"+link);
+
+        startActivity(Intent.createChooser(share, "Share news!"));
     }
 
 

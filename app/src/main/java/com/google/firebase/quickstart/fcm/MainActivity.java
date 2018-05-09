@@ -14,10 +14,14 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.util.Xml;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -48,7 +52,8 @@ public class MainActivity extends AppCompatActivity implements BaseSliderView.On
     private List<RssFeedModel2> list2;
     private SwipeRefreshLayout mSwipeLayout;
     private RssFeedListAdapter recyclerAdapter;
-    private TextView tv_top,tv_news_line;
+    private TextView tv_news_line;
+    private LinearLayout ll_top5;
     private SliderLayout mDemoSlider;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,7 +61,7 @@ public class MainActivity extends AppCompatActivity implements BaseSliderView.On
         setContentView(R.layout.activity_main);
 
         rv = (RecyclerView)findViewById(R.id.rv);
-        tv_top = (TextView) findViewById(R.id.tv_top);
+        ll_top5 = (LinearLayout) findViewById(R.id.ll_top5);
         tv_news_line = (TextView) findViewById(R.id.tv_news_line);
         mDemoSlider = findViewById(R.id.slider);
 
@@ -199,8 +204,8 @@ public class MainActivity extends AppCompatActivity implements BaseSliderView.On
                         top5_news +="  | ";
                 }
                 tv_news_line.setText(top5_news);
-                tv_top.setVisibility(View.VISIBLE);
-                tv_top.startAnimation(AnimationUtils.loadAnimation(MainActivity.this, android.R.anim.slide_in_left));
+//                ll_top5.setVisibility(View.VISIBLE);
+                ll_top5.startAnimation(AnimationUtils.loadAnimation(MainActivity.this, android.R.anim.slide_in_left));
 
             } else {
                 Toast.makeText(MainActivity.this,
@@ -454,5 +459,27 @@ public class MainActivity extends AppCompatActivity implements BaseSliderView.On
         } finally {
             inputStream.close();
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            // action with ID action_refresh was selected
+            case R.id.action_contact:
+                startActivity(new Intent(MainActivity.this,AboutActivity.class));
+                break;
+
+            default:
+                break;
+        }
+
+        return true;
     }
 }
