@@ -41,4 +41,20 @@
         android:text="@string/about_phone"
         />
 
+    <TextView
+        android:id="@+id/detail_web"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/detail_phone"
+        android:padding="5dp"
+        android:linksClickable="true"
+        android:layout_marginTop="10dp"
+        android:layout_centerHorizontal="true"
+        android:gravity="center"
+        android:autoLink="web"
+        android:textColor="@color/colorPrimary"
+        android:textSize="15dp"
+        android:text="@string/about_web"
+        />
+
 </RelativeLayout>
