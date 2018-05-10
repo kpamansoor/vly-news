@@ -3,16 +3,13 @@ package com.google.firebase.quickstart.fcm;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.util.List;
 
@@ -26,6 +23,7 @@ public class RssFeedListAdapter extends RecyclerView.Adapter<RssFeedListAdapter.
     private List<RssFeedModel> mRssFeedModels;
     private View.OnClickListener mClickListener;
     private int lastPosition = -1;
+    String[] linkArray, newsLinkArray;
     public static class FeedModelViewHolder extends RecyclerView.ViewHolder {
         private View rssFeedView;
 
@@ -60,10 +58,12 @@ public class RssFeedListAdapter extends RecyclerView.Adapter<RssFeedListAdapter.
                 try {
                     SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(view.getContext());
                     String links = preferences.getString("links", "");
-                    String[] linkArray;
-                    if (links.length() > 0) {
+                    String news_link = preferences.getString("news_link", "");
+
+                    if (links.length() > 0 && news_link.length() > 0) {
                         linkArray = links.split(",");
-                        details_page.putExtra("link_image", linkArray[pos]);
+                        newsLinkArray = news_link.split(",");
+                        details_page.putExtra("link_image", getImageLink(mRssFeedModels.get(pos).link));
                     }
                 }catch (Exception e){}
                 view.getContext().startActivity(details_page);
@@ -73,6 +73,17 @@ public class RssFeedListAdapter extends RecyclerView.Adapter<RssFeedListAdapter.
         });
         return holder;
     }
+
+    private String getImageLink(String news_link) {
+        for(int i = 0 ; i < linkArray.length; i++){
+            if(newsLinkArray[i].equals(news_link)) {
+                return linkArray[i];
+            }
+        }
+
+        return null;
+    }
+
 
     public void setClickListener(View.OnClickListener callback) {
         mClickListener = callback;

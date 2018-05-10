@@ -55,10 +55,15 @@ public class MainActivity extends AppCompatActivity implements BaseSliderView.On
     private TextView tv_news_line;
     private LinearLayout ll_top5;
     private SliderLayout mDemoSlider;
+    SharedPreferences preferences;
+    SharedPreferences.Editor editor;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        preferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
+        editor = preferences.edit();
 
         rv = (RecyclerView)findViewById(R.id.rv);
         ll_top5 = (LinearLayout) findViewById(R.id.ll_top5);
@@ -77,6 +82,12 @@ public class MainActivity extends AppCompatActivity implements BaseSliderView.On
         });
         new FetchFeedTask().execute();
         new FetchFeedDetails().execute();
+
+        // Show top5 from history
+        tv_news_line.setText(preferences.getString("top5", ""));
+        ll_top5.startAnimation(AnimationUtils.loadAnimation(MainActivity.this, android.R.anim.slide_in_left));
+
+
 
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -156,7 +167,7 @@ public class MainActivity extends AppCompatActivity implements BaseSliderView.On
 
     @Override
     protected void onStop() {
-        mDemoSlider.stopAutoCycle();
+//        mDemoSlider.stopAutoCycle();
         super.onStop();
     }
 
@@ -206,6 +217,8 @@ public class MainActivity extends AppCompatActivity implements BaseSliderView.On
                 tv_news_line.setText(top5_news);
 //                ll_top5.setVisibility(View.VISIBLE);
                 ll_top5.startAnimation(AnimationUtils.loadAnimation(MainActivity.this, android.R.anim.slide_in_left));
+                editor.putString("top5", top5_news);
+                editor.commit();
 
             } else {
                 Toast.makeText(MainActivity.this,
@@ -313,12 +326,15 @@ public class MainActivity extends AppCompatActivity implements BaseSliderView.On
                 InputStream inputStream = url.openConnection().getInputStream();
                 list2 = parseFeed2(inputStream);
                 String link_string = "";
+                String news_link_string = "";
                 for(int i = 0 ; i < list2.size(); i++){
                     link_string += list2.get(i).getLink()+",";
+                    news_link_string += list2.get(i).getNewsLink()+",";
                 }
-                SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
-                SharedPreferences.Editor editor = preferences.edit();
+
                 editor.putString("links", link_string);
+                editor.putString("news_link", news_link_string);
+
                 editor.commit();
 
                 return true;
@@ -385,10 +401,12 @@ public class MainActivity extends AppCompatActivity implements BaseSliderView.On
             IOException {
         String title = null;
         String link = null;
+        String news_link = null;
         String description = null;
         String content = null;
         boolean isItem = false;
         List<RssFeedModel2> items = new ArrayList<>();
+        RssFeedModel2 item;
 
         try {
             XmlPullParser xmlPullParser = Xml.newPullParser();
@@ -438,10 +456,13 @@ public class MainActivity extends AppCompatActivity implements BaseSliderView.On
                 if (title != null && link != null&& content != null && description != null ) {
                     if(isItem) {
                         try {
-                            link = content.split("<figure data-feedback=\"fb:likes,fb:comments\"><img src=\"")[1].split("\"/>")[0];
-                            RssFeedModel2 item = new RssFeedModel2(link);
+                            news_link = content.split("<figure data-feedback=\"fb:likes,fb:comments\"><img src=\"")[1].split("\"/>")[0];
+                            item = new RssFeedModel2(news_link,link);
                             items.add(item);
-                        }catch (Exception e){}
+                        }catch (IndexOutOfBoundsException e){
+                            item = new RssFeedModel2(null,link);
+                            items.add(item);
+                        }
 
 
                     }
@@ -482,4 +503,5 @@ public class MainActivity extends AppCompatActivity implements BaseSliderView.On
 
         return true;
     }
+
 }

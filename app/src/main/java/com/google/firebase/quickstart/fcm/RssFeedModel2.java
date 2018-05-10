@@ -15,7 +15,18 @@ public class RssFeedModel2 {
 
     public String link;
 
-    public RssFeedModel2(String link) {
+    public String getNewsLink() {
+        return news_link;
+    }
+
+    public void setNewsLink(String news_link) {
+        this.news_link = news_link;
+    }
+
+    public String news_link;
+
+    public RssFeedModel2(String link,String news_link) {
         this.link = link;
+        this.news_link = news_link;
     }
 }

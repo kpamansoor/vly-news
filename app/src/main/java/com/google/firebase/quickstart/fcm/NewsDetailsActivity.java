@@ -79,7 +79,7 @@ public class NewsDetailsActivity extends AppCompatActivity  {
         // Add data to the intent, the receiving app will decide
         // what to do with it.
         share.putExtra(Intent.EXTRA_SUBJECT, title);
-        share.putExtra(Intent.EXTRA_TEXT, desc + "\n"+link);
+        share.putExtra(Intent.EXTRA_TEXT, title +"\n\n"+desc + "\n"+link);
 
         startActivity(Intent.createChooser(share, "Share news!"));
     }
