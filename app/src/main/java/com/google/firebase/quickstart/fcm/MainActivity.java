@@ -11,6 +11,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -35,9 +36,16 @@ import com.glide.slider.library.SliderLayout;
 import com.glide.slider.library.SliderTypes.BaseSliderView;
 import com.glide.slider.library.SliderTypes.TextSliderView;
 import com.glide.slider.library.Tricks.ViewPagerEx;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.messaging.FirebaseMessaging;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import java.io.IOException;
@@ -62,6 +70,9 @@ public class MainActivity extends AppCompatActivity implements BaseSliderView.On
     private SliderLayout mDemoSlider;
     SharedPreferences preferences;
     SharedPreferences.Editor editor;
+    private AdView mAdView,mAdView2;
+    private FirebaseRemoteConfig mFirebaseRemoteConfig;
+    private boolean loadAds = false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -92,6 +103,14 @@ public class MainActivity extends AppCompatActivity implements BaseSliderView.On
         FirebaseApp.initializeApp(this);
         FirebaseMessaging.getInstance().subscribeToTopic("news");
         // Get token
+        mFirebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
+        FirebaseRemoteConfigSettings configSettings = new FirebaseRemoteConfigSettings.Builder()
+                .setDeveloperModeEnabled(BuildConfig.DEBUG)
+                .build();
+        mFirebaseRemoteConfig.setConfigSettings(configSettings);
+        mFirebaseRemoteConfig.setDefaults(R.xml.remote_config_defaults);
+        fetchConfig();
+
 
 
 
@@ -115,6 +134,57 @@ public class MainActivity extends AppCompatActivity implements BaseSliderView.On
 
 
     }
+
+    private void showAds() {
+        mAdView = findViewById(R.id.adView);
+        mAdView2 = findViewById(R.id.adView2);
+        if(loadAds) {
+
+            mAdView.setVisibility(View.VISIBLE);
+            mAdView2.setVisibility(View.GONE);
+            AdRequest adRequest = new AdRequest.Builder().build();
+            mAdView.loadAd(adRequest);
+        }
+        else{
+
+            mAdView2.setVisibility(View.VISIBLE);
+            mAdView.setVisibility(View.GONE);
+            AdRequest adRequest = new AdRequest.Builder().build();
+            mAdView2.loadAd(adRequest);
+        }
+//        ca-app-pub-1243068719441957/2429189234
+    }
+
+    private void fetchConfig() {
+        loadAds = mFirebaseRemoteConfig.getBoolean("load_news_details_ads");
+
+        long cacheExpiration = 3600; // 1 hour in seconds.
+        // If your app is using developer mode, cacheExpiration is set to 0, so each fetch will
+        // retrieve values from the service.
+        if (mFirebaseRemoteConfig.getInfo().getConfigSettings().isDeveloperModeEnabled()) {
+            cacheExpiration = 0;
+        }
+
+        // [START fetch_config_with_callback]
+        // cacheExpirationSeconds is set to cacheExpiration here, indicating the next fetch request
+        // will use fetch data from the Remote Config service, rather than cached parameter values,
+        // if cached parameter values are more than cacheExpiration seconds old.
+        // See Best Practices in the README for more information.
+        mFirebaseRemoteConfig.fetch(cacheExpiration)
+                .addOnCompleteListener(this, new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if (task.isSuccessful()) {
+                            mFirebaseRemoteConfig.activateFetched();
+                            loadAds = mFirebaseRemoteConfig.getBoolean("load_news_details_ads");
+                            showAds();
+                        }
+
+                    }
+                });
+        // [END fetch_config_with_callback]
+    }
+
 
     private void loadNews() {
 

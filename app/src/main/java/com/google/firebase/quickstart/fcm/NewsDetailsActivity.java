@@ -29,7 +29,7 @@ public class NewsDetailsActivity extends AppCompatActivity  {
     private Button btn_full_story,btn_share;
     private ImageView detail_photo;
     private List<RssFeedModel2> image_links;
-    private AdView mAdView;
+    private AdView mAdView,mAdView2;
     private FirebaseRemoteConfig mFirebaseRemoteConfig;
     private boolean loadAds = false;
 
@@ -39,7 +39,7 @@ public class NewsDetailsActivity extends AppCompatActivity  {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_news_details);
 
-        showAds();
+//        showAds();
 
         mFirebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
         FirebaseRemoteConfigSettings configSettings = new FirebaseRemoteConfigSettings.Builder()
@@ -95,10 +95,19 @@ public class NewsDetailsActivity extends AppCompatActivity  {
     }
 
     private void showAds() {
+        mAdView = findViewById(R.id.adView);
+        mAdView2 = findViewById(R.id.adView2);
         if(loadAds) {
-            mAdView = findViewById(R.id.adView);
+            mAdView.setVisibility(View.VISIBLE);
+            mAdView2.setVisibility(View.GONE);
             AdRequest adRequest = new AdRequest.Builder().build();
             mAdView.loadAd(adRequest);
+        }
+        else{
+            mAdView2.setVisibility(View.VISIBLE);
+            mAdView.setVisibility(View.GONE);
+            AdRequest adRequest = new AdRequest.Builder().build();
+            mAdView2.loadAd(adRequest);
         }
 //        ca-app-pub-1243068719441957/2429189234
     }
