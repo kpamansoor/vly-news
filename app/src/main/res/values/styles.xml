@@ -5,6 +5,7 @@
         <item name="colorPrimary">@color/vly1</item>
         <item name="colorPrimaryDark">@color/vly1</item>
         <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:windowNoTitle">true</item>
     </style>
 
     <style name="FullscreenTheme" parent="AppTheme">

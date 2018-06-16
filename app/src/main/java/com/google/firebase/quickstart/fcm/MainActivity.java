@@ -73,11 +73,13 @@ public class MainActivity extends AppCompatActivity implements BaseSliderView.On
     private AdView mAdView,mAdView2;
     private FirebaseRemoteConfig mFirebaseRemoteConfig;
     private boolean loadAds = false;
+    LinearLayout splash, content;
+    ImageView info,share;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getSupportActionBar().hide();
         setContentView(R.layout.activity_main);
-
         preferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
         editor = preferences.edit();
 
@@ -110,7 +112,27 @@ public class MainActivity extends AppCompatActivity implements BaseSliderView.On
         mFirebaseRemoteConfig.setConfigSettings(configSettings);
         mFirebaseRemoteConfig.setDefaults(R.xml.remote_config_defaults);
         fetchConfig();
+        splash = findViewById(R.id.splash);
+        content = findViewById(R.id.content);
+        info = findViewById(R.id.info);
+        share = findViewById(R.id.share);
 
+        info.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(MainActivity.this,AboutActivity.class));
+            }
+        });
+        share.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent sendIntent = new Intent();
+                sendIntent.setAction(Intent.ACTION_SEND);
+                sendIntent.putExtra(Intent.EXTRA_TEXT, "Stay updated with news from valanchery!!!\nInstall valanchery news app from:\nhttps://play.google.com/store/apps/details?id=com.mansoor.vly.in");
+                sendIntent.setType("text/plain");
+                startActivity(sendIntent);
+            }
+        });
 
 
 
@@ -316,6 +338,9 @@ public class MainActivity extends AppCompatActivity implements BaseSliderView.On
                 ll_top5.startAnimation(AnimationUtils.loadAnimation(MainActivity.this, android.R.anim.slide_in_left));
                 editor.putString("top5", top5_news);
                 editor.commit();
+
+                splash.setVisibility(View.GONE);
+                content.setVisibility(View.VISIBLE);
 
             } else {
                 Toast.makeText(MainActivity.this,
@@ -581,26 +606,6 @@ public class MainActivity extends AppCompatActivity implements BaseSliderView.On
         }
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.menu, menu);
-        return true;
-    }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            // action with ID action_refresh was selected
-            case R.id.action_contact:
-                startActivity(new Intent(MainActivity.this,AboutActivity.class));
-                break;
-
-            default:
-                break;
-        }
-
-        return true;
-    }
 
 }

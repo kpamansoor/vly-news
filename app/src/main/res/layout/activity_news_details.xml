@@ -20,6 +20,7 @@
         android:layout_below="@id/detail_photo"
         android:padding="5dp"
         android:textColor="#000"
+        android:fontFamily="sans-serif-condensed"
         android:textSize="18dp"
         android:textStyle="bold" />
 
@@ -72,7 +73,7 @@
                     android:layout_margin="10dp"
                     android:layout_weight="1"
                     android:background="@drawable/button_shape"
-                    android:text="Read full story..."
+                    android:text="Read full..."
                     android:textColor="#fff" />
             </LinearLayout>
         </LinearLayout>
