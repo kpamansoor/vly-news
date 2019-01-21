@@ -575,12 +575,14 @@ public class MainActivity extends AppCompatActivity implements BaseSliderView.On
                         description = result;
                 } else if (name.equalsIgnoreCase("content:encoded")) {
                     content = result;
+//                    result.split("<img src=\"")[1].split("\"/>")[0]
                 }
 
                 if (title != null && link != null&& content != null && description != null ) {
                     if(isItem) {
                         try {
-                            news_link = content.split("<figure data-feedback=\"fb:likes,fb:comments\"><img src=\"")[1].split("\"/>")[0];
+//                            news_link = content.split("<figure data-feedback=\"fb:likes,fb:comments\"><img src=\"")[1].split("\"/>")[0];
+                            news_link = content.split("<img src=\"")[1].split("\"/>")[0];
                             item = new RssFeedModel2(news_link,link);
                             items.add(item);
                         }catch (IndexOutOfBoundsException e){

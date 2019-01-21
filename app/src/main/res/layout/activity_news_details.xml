@@ -63,7 +63,7 @@
                     android:layout_margin="10dp"
                     android:layout_weight="1"
                     android:background="@drawable/button_shape"
-                    android:text="Share"
+                    android:text="Share ചെയ്യാം "
                     android:textColor="#fff" />
 
                 <Button
@@ -73,7 +73,7 @@
                     android:layout_margin="10dp"
                     android:layout_weight="1"
                     android:background="@drawable/button_shape"
-                    android:text="Read full..."
+                    android:text="മുഴുവൻ വായിക്കാം "
                     android:textColor="#fff" />
             </LinearLayout>
         </LinearLayout>

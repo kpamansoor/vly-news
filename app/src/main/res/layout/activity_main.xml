@@ -54,7 +54,7 @@
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:layout_height="wrap_content"
-                android:src="@android:drawable/ic_menu_info_details"/>
+                android:src="@drawable/info"/>
         </LinearLayout>
     <com.glide.slider.library.SliderLayout
         android:id="@+id/slider"
